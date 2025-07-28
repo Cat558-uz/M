@@ -1,0 +1,223 @@
+-- ⛅ Estilo RedzLib - Library UI personalizada
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "StyledUILib"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 340, 0, 420)
+frame.Position = UDim2.new(0.5, -170, 0.5, -210)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 12)
+
+local shadow = Instance.new("ImageLabel", frame)
+shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+shadow.Position = UDim2.new(0.5, 0, 0.5, 5)
+shadow.Size = UDim2.new(1, 50, 1, 50)
+shadow.BackgroundTransparency = 1
+shadow.Image = "rbxassetid://1316045217"
+shadow.ImageColor3 = Color3.new(0, 0, 0)
+shadow.ImageTransparency = 0.85
+shadow.ScaleType = Enum.ScaleType.Slice
+shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+shadow.ZIndex = 0
+
+-- Topbar
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -60, 0, 28)
+title.Position = UDim2.new(0, 15, 0, 8)
+title.BackgroundTransparency = 1
+title.Text = "🌌 Styled UI Library"
+title.TextColor3 = Color3.fromRGB(220, 220, 255)
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Font = Enum.Font.GothamBold
+title.TextSize = 15
+
+local close = Instance.new("TextButton", frame)
+close.Size = UDim2.new(0, 24, 0, 24)
+close.Position = UDim2.new(1, -34, 0, 7)
+close.Text = "✕"
+close.TextColor3 = Color3.fromRGB(255, 100, 100)
+close.BackgroundTransparency = 1
+close.Font = Enum.Font.GothamBold
+close.TextSize = 14
+close.ZIndex = 3
+close.MouseButton1Click:Connect(function()
+	gui:Destroy()
+end)
+
+local minimize = Instance.new("TextButton", frame)
+minimize.Size = UDim2.new(0, 24, 0, 24)
+minimize.Position = UDim2.new(1, -62, 0, 7)
+minimize.Text = "-"
+minimize.TextColor3 = Color3.fromRGB(180, 180, 255)
+minimize.BackgroundTransparency = 1
+minimize.Font = Enum.Font.GothamBold
+minimize.TextSize = 16
+minimize.ZIndex = 3
+
+-- Tab bar
+local tabBar = Instance.new("Frame", frame)
+tabBar.Size = UDim2.new(1, -20, 0, 30)
+tabBar.Position = UDim2.new(0, 10, 0, 42)
+tabBar.BackgroundTransparency = 1
+tabBar.ZIndex = 2
+
+local tabLayout = Instance.new("UIListLayout", tabBar)
+tabLayout.FillDirection = Enum.FillDirection.Horizontal
+tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+tabLayout.Padding = UDim.new(0, 8)
+
+-- TABS e SCROLL
+local tabs = {}
+local currentTab = nil
+
+local function switchToTab(tabData)
+	for _, t in pairs(tabs) do
+		t.scroll.Visible = false
+		t.button.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+	end
+	tabData.scroll.Visible = true
+	tabData.button.BackgroundColor3 = Color3.fromRGB(85, 50, 150)
+	currentTab = tabData
+end
+
+-- Minimizar efeito
+local isMinimized = false
+local originalSize = frame.Size
+
+minimize.MouseButton1Click:Connect(function()
+	isMinimized = not isMinimized
+	local goal = isMinimized and UDim2.new(0, 340, 0, 60) or originalSize
+	TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Size = goal
+	}):Play()
+
+	if currentTab then
+		currentTab.scroll.Visible = not isMinimized
+	end
+end)
+
+-- LIBRARY PRINCIPAL
+local library = {}
+
+function library:AddTab(name)
+	local tabButton = Instance.new("TextButton")
+	tabButton.Size = UDim2.new(0, 90, 1, 0)
+	tabButton.Text = name
+	tabButton.Font = Enum.Font.GothamBold
+	tabButton.TextSize = 13
+	tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	tabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+	tabButton.AutoButtonColor = false
+	tabButton.Parent = tabBar
+	Instance.new("UICorner", tabButton).CornerRadius = UDim.new(0, 6)
+
+	tabButton.MouseEnter:Connect(function()
+		if currentTab and currentTab.button ~= tabButton then
+			TweenService:Create(tabButton, TweenInfo.new(0.15), {
+				BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+			}):Play()
+		end
+	end)
+	tabButton.MouseLeave:Connect(function()
+		if currentTab and currentTab.button ~= tabButton then
+			TweenService:Create(tabButton, TweenInfo.new(0.15), {
+				BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+			}):Play()
+		end
+	end)
+
+	local scroll = Instance.new("ScrollingFrame", frame)
+	scroll.Size = UDim2.new(1, -20, 1, -85)
+	scroll.Position = UDim2.new(0, 10, 0, 80)
+	scroll.BackgroundTransparency = 1
+	scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	scroll.ScrollBarThickness = 6
+	scroll.Visible = false
+	scroll.BorderSizePixel = 0
+	scroll.ZIndex = 2
+
+	local layout = Instance.new("UIListLayout", scroll)
+	layout.Padding = UDim.new(0, 10)
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+	end)
+
+	-- API
+	local tabAPI = {}
+
+	function tabAPI:AddLabel(text)
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.new(1, -10, 0, 25)
+		label.BackgroundTransparency = 1
+		label.Text = text
+		label.TextColor3 = Color3.fromRGB(255, 255, 255)
+		label.Font = Enum.Font.Gotham
+		label.TextSize = 13
+		label.TextXAlignment = Enum.TextXAlignment.Left
+		label.Parent = scroll
+	end
+
+	function tabAPI:AddButton(text, callback)
+		local btn = Instance.new("TextButton")
+		btn.Size = UDim2.new(1, -10, 0, 30)
+		btn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+		btn.TextColor3 = Color3.new(1, 1, 1)
+		btn.Font = Enum.Font.GothamSemibold
+		btn.TextSize = 13
+		btn.Text = text
+		btn.Parent = scroll
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+		btn.MouseButton1Click:Connect(function()
+			pcall(callback)
+		end)
+	end
+
+	function tabAPI:AddToggle(text, default, callback)
+		local toggled = default
+		local btn = Instance.new("TextButton")
+		btn.Size = UDim2.new(1, -10, 0, 30)
+		btn.BackgroundColor3 = toggled and Color3.fromRGB(85, 50, 150) or Color3.fromRGB(50, 50, 70)
+		btn.TextColor3 = Color3.new(1, 1, 1)
+		btn.Font = Enum.Font.GothamSemibold
+		btn.TextSize = 13
+		btn.Text = text
+		btn.Parent = scroll
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+		btn.MouseButton1Click:Connect(function()
+			toggled = not toggled
+			TweenService:Create(btn, TweenInfo.new(0.2), {
+				BackgroundColor3 = toggled and Color3.fromRGB(85, 50, 150) or Color3.fromRGB(50, 50, 70)
+			}):Play()
+			pcall(callback, toggled)
+		end)
+	end
+
+	function tabAPI:AddSection(name)
+		local section = Instance.new("TextLabel")
+		section.Size = UDim2.new(1, -10, 0, 25)
+		section.BackgroundTransparency = 1
+		section.Text = "🔸 " .. name
+		section.TextColor3 = Color3.fromRGB(180, 180, 255)
+		section.Font = Enum.Font.GothamBold
+		section.TextSize = 14
+		section.TextXAlignment = Enum.TextXAlignment.Left
+		section.Parent = scroll
+	end
+
+	return tabAPI, switchToTab({ scroll = scroll, button = tabButton }), table.insert(tabs, { scroll = scroll, button = tabButton }), currentTab or switchToTab({ scroll = scroll, button = tabButton })
+end
+
+return library
