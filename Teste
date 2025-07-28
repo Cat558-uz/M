@@ -1,4 +1,4 @@
--- Library criada do zero
+-- Library criada do zero com drag, scroll e toggle
 local Library = {}
 
 -- Serviços
@@ -21,6 +21,8 @@ MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainFrame.BorderSizePixel = 0
 MainFrame.Name = "MainFrame"
+MainFrame.Active = true
+MainFrame.Draggable = true -- Drag GUI ativado
 
 -- Layout das abas
 local TabButtons = Instance.new("Frame", MainFrame)
@@ -38,6 +40,18 @@ TabContent.BorderSizePixel = 0
 local UIListLayout = Instance.new("UIListLayout", TabButtons)
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
+-- Título principal
+function Library:AddTitle(text)
+	local title = Instance.new("TextLabel", MainFrame)
+	title.Size = UDim2.new(1, 0, 0, 30)
+	title.Position = UDim2.new(0, 0, 0, -30)
+	title.BackgroundTransparency = 1
+	title.Text = text
+	title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 16
+end
+
 -- Tabela de abas
 local Tabs = {}
 
@@ -52,29 +66,33 @@ function Library:AddTab(tabName)
 	tabButton.Font = Enum.Font.Gotham
 	tabButton.TextSize = 14
 
-	local content = Instance.new("Frame", TabContent)
-	content.Size = UDim2.new(1, 0, 1, 0)
-	content.BackgroundTransparency = 1
-	content.Visible = false
+	local scroll = Instance.new("ScrollingFrame", TabContent)
+	scroll.Size = UDim2.new(1, 0, 1, 0)
+	scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	scroll.ScrollBarThickness = 4
+	scroll.BackgroundTransparency = 1
+	scroll.Visible = false
+	scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	scroll.Name = tabName
 
-	local layout = Instance.new("UIListLayout", content)
+	local layout = Instance.new("UIListLayout", scroll)
 	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.Padding = UDim.new(0, 5)
 
-	Tabs[tabName] = content
+	Tabs[tabName] = scroll
 
 	tabButton.MouseButton1Click:Connect(function()
 		for _, tab in pairs(TabContent:GetChildren()) do
-			if tab:IsA("Frame") then
+			if tab:IsA("ScrollingFrame") then
 				tab.Visible = false
 			end
 		end
-		content.Visible = true
+		scroll.Visible = true
 	end)
 
 	return {
 		AddButton = function(_, text, callback)
-			local btn = Instance.new("TextButton", content)
+			local btn = Instance.new("TextButton", scroll)
 			btn.Size = UDim2.new(1, -10, 0, 30)
 			btn.Text = text
 			btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
@@ -86,7 +104,7 @@ function Library:AddTab(tabName)
 		end,
 
 		AddLabel = function(_, text)
-			local lbl = Instance.new("TextLabel", content)
+			local lbl = Instance.new("TextLabel", scroll)
 			lbl.Size = UDim2.new(1, -10, 0, 25)
 			lbl.Text = text
 			lbl.BackgroundTransparency = 1
@@ -96,7 +114,7 @@ function Library:AddTab(tabName)
 		end,
 
 		AddTextBox = function(_, placeholder, callback)
-			local txt = Instance.new("TextBox", content)
+			local txt = Instance.new("TextBox", scroll)
 			txt.Size = UDim2.new(1, -10, 0, 30)
 			txt.PlaceholderText = placeholder
 			txt.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -104,6 +122,7 @@ function Library:AddTab(tabName)
 			txt.Font = Enum.Font.Gotham
 			txt.TextSize = 14
 			txt.BorderSizePixel = 0
+			txt.ClearTextOnFocus = false
 			txt.FocusLost:Connect(function(enter)
 				if enter then
 					callback(txt.Text)
@@ -112,7 +131,7 @@ function Library:AddTab(tabName)
 		end,
 
 		AddKeybind = function(_, bindName, callback)
-			local lbl = Instance.new("TextLabel", content)
+			local lbl = Instance.new("TextLabel", scroll)
 			lbl.Size = UDim2.new(1, -10, 0, 25)
 			lbl.Text = bindName .. ": Pressione uma tecla"
 			lbl.BackgroundTransparency = 1
@@ -135,6 +154,25 @@ function Library:AddTab(tabName)
 						end
 					end)
 				end
+			end)
+		end,
+
+		AddToggle = function(_, text, callback)
+			local toggle = Instance.new("TextButton", scroll)
+			toggle.Size = UDim2.new(1, -10, 0, 30)
+			toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+			toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+			toggle.Font = Enum.Font.Gotham
+			toggle.TextSize = 14
+			toggle.BorderSizePixel = 0
+
+			local state = false
+			toggle.Text = "[ OFF ] " .. text
+
+			toggle.MouseButton1Click:Connect(function()
+				state = not state
+				toggle.Text = (state and "[ ON ] " or "[ OFF ] ") .. text
+				callback(state)
 			end)
 		end
 	}
