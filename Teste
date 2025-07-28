@@ -1,4 +1,4 @@
--- Library criada do zero com drag, scroll e toggle
+-- Library com toggle key, minimizar/maximizar/fechar e tudo arredondado
 local Library = {}
 
 -- Serviços
@@ -14,57 +14,111 @@ ScreenGui.Name = "CustomLibrary"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 
--- Janela principal
-local MainFrame = Instance.new("Frame", ScreenGui)
+-- MainFrame
+local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 400, 0, 300)
 MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainFrame.BorderSizePixel = 0
-MainFrame.Name = "MainFrame"
 MainFrame.Active = true
-MainFrame.Draggable = true -- Drag GUI ativado
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+local corner = Instance.new("UICorner", MainFrame)
+corner.CornerRadius = UDim.new(0, 8)
+
+-- Header com botão minimizar e fechar
+local Header = Instance.new("Frame", MainFrame)
+Header.Size = UDim2.new(1, 0, 0, 30)
+Header.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 8)
+
+local TitleLabel = Instance.new("TextLabel", Header)
+TitleLabel.Size = UDim2.new(1, -90, 1, 0)
+TitleLabel.Position = UDim2.new(0, 5, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "Library"
+TitleLabel.TextColor3 = Color3.new(1, 1, 1)
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 14
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Botões: minimizar, restaurar, fechar
+local function createHeaderButton(symbol, posX)
+	local btn = Instance.new("TextButton", Header)
+	btn.Size = UDim2.new(0, 30, 0, 30)
+	btn.Position = UDim2.new(1, posX, 0, 0)
+	btn.BackgroundTransparency = 1
+	btn.Text = symbol
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 16
+	return btn
+end
+
+local MinBtn = createHeaderButton("-", -90)
+local MaxBtn = createHeaderButton("+", -60)
+local CloseBtn = createHeaderButton("X", -30)
 
 -- Layout das abas
 local TabButtons = Instance.new("Frame", MainFrame)
-TabButtons.Size = UDim2.new(0, 100, 1, 0)
-TabButtons.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-TabButtons.BorderSizePixel = 0
+TabButtons.Size = UDim2.new(0, 100, 1, -30)
+TabButtons.Position = UDim2.new(0, 0, 0, 30)
+TabButtons.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Instance.new("UICorner", TabButtons).CornerRadius = UDim.new(0, 6)
 
 local TabContent = Instance.new("Frame", MainFrame)
-TabContent.Position = UDim2.new(0, 100, 0, 0)
-TabContent.Size = UDim2.new(1, -100, 1, 0)
-TabContent.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-TabContent.BorderSizePixel = 0
+TabContent.Position = UDim2.new(0, 100, 0, 30)
+TabContent.Size = UDim2.new(1, -100, 1, -30)
+TabContent.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+Instance.new("UICorner", TabContent).CornerRadius = UDim.new(0, 6)
 
--- Layouts
 local UIListLayout = Instance.new("UIListLayout", TabButtons)
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- Título principal
+local Tabs = {}
+local GUIVisible = true
+local Minimized = false
+
 function Library:AddTitle(text)
-	local title = Instance.new("TextLabel", MainFrame)
-	title.Size = UDim2.new(1, 0, 0, 30)
-	title.Position = UDim2.new(0, 0, 0, -30)
-	title.BackgroundTransparency = 1
-	title.Text = text
-	title.TextColor3 = Color3.fromRGB(255, 255, 255)
-	title.Font = Enum.Font.GothamBold
-	title.TextSize = 16
+	TitleLabel.Text = text
 end
 
--- Tabela de abas
-local Tabs = {}
+function Library:AddKeyOpen(keyName)
+	UserInputService.InputBegan:Connect(function(input, gpe)
+		if not gpe and input.KeyCode == Enum.KeyCode[keyName:upper()] then
+			GUIVisible = not GUIVisible
+			ScreenGui.Enabled = GUIVisible
+		end
+	end)
+end
 
--- Função para criar nova aba
+MinBtn.MouseButton1Click:Connect(function()
+	TabButtons.Visible = false
+	TabContent.Visible = false
+	Minimized = true
+end)
+
+MaxBtn.MouseButton1Click:Connect(function()
+	TabButtons.Visible = true
+	TabContent.Visible = true
+	Minimized = false
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+	ScreenGui:Destroy()
+end)
+
 function Library:AddTab(tabName)
 	local tabButton = Instance.new("TextButton", TabButtons)
 	tabButton.Text = tabName
 	tabButton.Size = UDim2.new(1, 0, 0, 30)
-	tabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 	tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	tabButton.BorderSizePixel = 0
 	tabButton.Font = Enum.Font.Gotham
 	tabButton.TextSize = 14
+	tabButton.BorderSizePixel = 0
+	Instance.new("UICorner", tabButton).CornerRadius = UDim.new(0, 6)
 
 	local scroll = Instance.new("ScrollingFrame", TabContent)
 	scroll.Size = UDim2.new(1, 0, 1, 0)
@@ -95,11 +149,12 @@ function Library:AddTab(tabName)
 			local btn = Instance.new("TextButton", scroll)
 			btn.Size = UDim2.new(1, -10, 0, 30)
 			btn.Text = text
-			btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+			btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 			btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 			btn.Font = Enum.Font.Gotham
 			btn.TextSize = 14
 			btn.BorderSizePixel = 0
+			Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
 			btn.MouseButton1Click:Connect(callback)
 		end,
 
@@ -123,6 +178,7 @@ function Library:AddTab(tabName)
 			txt.TextSize = 14
 			txt.BorderSizePixel = 0
 			txt.ClearTextOnFocus = false
+			Instance.new("UICorner", txt).CornerRadius = UDim.new(0, 6)
 			txt.FocusLost:Connect(function(enter)
 				if enter then
 					callback(txt.Text)
@@ -130,10 +186,10 @@ function Library:AddTab(tabName)
 			end)
 		end,
 
-		AddKeybind = function(_, bindName, callback)
+		AddKeybind = function(_, name, callback)
 			local lbl = Instance.new("TextLabel", scroll)
 			lbl.Size = UDim2.new(1, -10, 0, 25)
-			lbl.Text = bindName .. ": Pressione uma tecla"
+			lbl.Text = name .. ": Pressione uma tecla"
 			lbl.BackgroundTransparency = 1
 			lbl.TextColor3 = Color3.fromRGB(200, 200, 200)
 			lbl.Font = Enum.Font.Gotham
@@ -143,11 +199,11 @@ function Library:AddTab(tabName)
 			lbl.InputBegan:Connect(function()
 				if not listening then
 					listening = true
-					lbl.Text = bindName .. ": Aguardando tecla..."
+					lbl.Text = name .. ": Aguardando tecla..."
 					local connection
 					connection = UserInputService.InputBegan:Connect(function(input, gpe)
 						if not gpe and input.UserInputType == Enum.UserInputType.Keyboard then
-							lbl.Text = bindName .. ": " .. input.KeyCode.Name
+							lbl.Text = name .. ": " .. input.KeyCode.Name
 							callback(input.KeyCode)
 							listening = false
 							connection:Disconnect()
@@ -165,6 +221,7 @@ function Library:AddTab(tabName)
 			toggle.Font = Enum.Font.Gotham
 			toggle.TextSize = 14
 			toggle.BorderSizePixel = 0
+			Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 6)
 
 			local state = false
 			toggle.Text = "[ OFF ] " .. text
