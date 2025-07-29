@@ -1,238 +1,156 @@
--- Library com toggle key, minimizar/maximizar/fechar e tudo arredondado
-local Library = {}
+-- Library com toggle key, minimizar/maximizar/fechar e tudo arredondado local Library = {}
 
--- Serviços
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
+-- Serviços local Players = game:GetService("Players") local LocalPlayer = Players.LocalPlayer local PlayerGui = LocalPlayer:WaitForChild("PlayerGui") local TweenService = game:GetService("TweenService") local UserInputService = game:GetService("UserInputService")
 
--- GUI principal
-local ScreenGui = Instance.new("ScreenGui", PlayerGui)
-ScreenGui.Name = "CustomLibrary"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.IgnoreGuiInset = true
+-- GUI principal local ScreenGui = Instance.new("ScreenGui", PlayerGui) ScreenGui.Name = "CustomLibrary" ScreenGui.ResetOnSpawn = false ScreenGui.IgnoreGuiInset = true
 
--- MainFrame
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 400, 0, 300)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
+-- MainFrame local MainFrame = Instance.new("Frame") MainFrame.Size = UDim2.new(0, 400, 0, 300) MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150) MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25) MainFrame.BorderSizePixel = 0 MainFrame.Active = true MainFrame.Draggable = true MainFrame.Parent = ScreenGui
 
-local corner = Instance.new("UICorner", MainFrame)
-corner.CornerRadius = UDim.new(0, 8)
+local corner = Instance.new("UICorner", MainFrame) corner.CornerRadius = UDim.new(0, 8)
 
--- Header com botão minimizar e fechar
-local Header = Instance.new("Frame", MainFrame)
-Header.Size = UDim2.new(1, 0, 0, 30)
-Header.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 8)
+-- Header com botão minimizar e fechar local Header = Instance.new("Frame", MainFrame) Header.Size = UDim2.new(1, 0, 0, 30) Header.BackgroundColor3 = Color3.fromRGB(30, 30, 30) Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 8)
 
-local TitleLabel = Instance.new("TextLabel", Header)
-TitleLabel.Size = UDim2.new(1, -90, 1, 0)
-TitleLabel.Position = UDim2.new(0, 5, 0, 0)
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "Library"
-TitleLabel.TextColor3 = Color3.new(1, 1, 1)
-TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.TextSize = 14
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+local TitleLabel = Instance.new("TextLabel", Header) TitleLabel.Size = UDim2.new(1, -90, 1, 0) TitleLabel.Position = UDim2.new(0, 5, 0, 0) TitleLabel.BackgroundTransparency = 1 TitleLabel.Text = "Library" TitleLabel.TextColor3 = Color3.new(1, 1, 1) TitleLabel.Font = Enum.Font.GothamBold TitleLabel.TextSize = 14 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
--- Botões: minimizar, restaurar, fechar
-local function createHeaderButton(symbol, posX)
-	local btn = Instance.new("TextButton", Header)
-	btn.Size = UDim2.new(0, 30, 0, 30)
-	btn.Position = UDim2.new(1, posX, 0, 0)
-	btn.BackgroundTransparency = 1
-	btn.Text = symbol
-	btn.TextColor3 = Color3.new(1,1,1)
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 16
-	return btn
-end
+local function createHeaderButton(symbol, posX) local btn = Instance.new("TextButton", Header) btn.Size = UDim2.new(0, 30, 0, 30) btn.Position = UDim2.new(1, posX, 0, 0) btn.BackgroundTransparency = 1 btn.Text = symbol btn.TextColor3 = Color3.new(1,1,1) btn.Font = Enum.Font.GothamBold btn.TextSize = 16 return btn end
 
-local MinBtn = createHeaderButton("-", -90)
-local MaxBtn = createHeaderButton("+", -60)
-local CloseBtn = createHeaderButton("X", -30)
+local MinBtn = createHeaderButton("-", -90) local MaxBtn = createHeaderButton("+", -60) local CloseBtn = createHeaderButton("X", -30)
 
--- Layout das abas
-local TabButtons = Instance.new("Frame", MainFrame)
-TabButtons.Size = UDim2.new(0, 100, 1, -30)
-TabButtons.Position = UDim2.new(0, 0, 0, 30)
-TabButtons.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-Instance.new("UICorner", TabButtons).CornerRadius = UDim.new(0, 6)
+local TabButtons = Instance.new("Frame", MainFrame) TabButtons.Size = UDim2.new(0, 100, 1, -30) TabButtons.Position = UDim2.new(0, 0, 0, 30) TabButtons.BackgroundColor3 = Color3.fromRGB(35, 35, 35) Instance.new("UICorner", TabButtons).CornerRadius = UDim.new(0, 6)
 
-local TabContent = Instance.new("Frame", MainFrame)
-TabContent.Position = UDim2.new(0, 100, 0, 30)
-TabContent.Size = UDim2.new(1, -100, 1, -30)
-TabContent.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-Instance.new("UICorner", TabContent).CornerRadius = UDim.new(0, 6)
+local TabContent = Instance.new("Frame", MainFrame) TabContent.Position = UDim2.new(0, 100, 0, 30) TabContent.Size = UDim2.new(1, -100, 1, -30) TabContent.BackgroundColor3 = Color3.fromRGB(45, 45, 45) Instance.new("UICorner", TabContent).CornerRadius = UDim.new(0, 6)
 
-local UIListLayout = Instance.new("UIListLayout", TabButtons)
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+local UIListLayout = Instance.new("UIListLayout", TabButtons) UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-local Tabs = {}
-local GUIVisible = true
-local Minimized = false
+local Tabs = {} local GUIVisible = true local Minimized = false
 
-function Library:AddTitle(text)
-	TitleLabel.Text = text
-end
+function Library:AddTitle(text) TitleLabel.Text = text end
 
-function Library:AddKeyOpen(keyName)
-	UserInputService.InputBegan:Connect(function(input, gpe)
-		if not gpe and input.KeyCode == Enum.KeyCode[keyName:upper()] then
-			GUIVisible = not GUIVisible
-			ScreenGui.Enabled = GUIVisible
+function Library:AddKeyOpen(key) UserInputService.InputBegan:Connect(function(input, gpe) if not gpe and input.KeyCode == key then GUIVisible = not GUIVisible ScreenGui.Enabled = GUIVisible end end) end
+
+MinBtn.MouseButton1Click:Connect(function() TabButtons.Visible = false TabContent.Visible = false Minimized = true end)
+
+MaxBtn.MouseButton1Click:Connect(function() TabButtons.Visible = true TabContent.Visible = true Minimized = false end)
+
+CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+function Library:AddTab(tabName) local tabButton = Instance.new("TextButton", TabButtons) tabButton.Text = tabName tabButton.Size = UDim2.new(1, 0, 0, 30) tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60) tabButton.TextColor3 = Color3.fromRGB(255, 255, 255) tabButton.Font = Enum.Font.Gotham tabButton.TextSize = 14 tabButton.BorderSizePixel = 0 Instance.new("UICorner", tabButton).CornerRadius = UDim.new(0, 6)
+
+local scroll = Instance.new("ScrollingFrame", TabContent)
+scroll.Size = UDim2.new(1, 0, 1, 0)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+scroll.ScrollBarThickness = 4
+scroll.BackgroundTransparency = 1
+scroll.Visible = false
+scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scroll.Name = tabName
+
+local layout = Instance.new("UIListLayout", scroll)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Padding = UDim.new(0, 5)
+
+Tabs[tabName] = scroll
+
+tabButton.MouseButton1Click:Connect(function()
+	for _, tab in pairs(TabContent:GetChildren()) do
+		if tab:IsA("ScrollingFrame") then
+			tab.Visible = false
 		end
-	end)
-end
-
-MinBtn.MouseButton1Click:Connect(function()
-	TabButtons.Visible = false
-	TabContent.Visible = false
-	Minimized = true
+	end
+	scroll.Visible = true
 end)
 
-MaxBtn.MouseButton1Click:Connect(function()
-	TabButtons.Visible = true
-	TabContent.Visible = true
-	Minimized = false
-end)
+return {
+	AddButton = function(_, text, callback)
+		local btn = Instance.new("TextButton", scroll)
+		btn.Size = UDim2.new(1, -10, 0, 30)
+		btn.Text = text
+		btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.Font = Enum.Font.Gotham
+		btn.TextSize = 14
+		btn.BorderSizePixel = 0
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+		btn.MouseButton1Click:Connect(callback)
+	end,
 
-CloseBtn.MouseButton1Click:Connect(function()
-	ScreenGui:Destroy()
-end)
+	AddLabel = function(_, text)
+		local lbl = Instance.new("TextLabel", scroll)
+		lbl.Size = UDim2.new(1, -10, 0, 25)
+		lbl.Text = text
+		lbl.BackgroundTransparency = 1
+		lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+		lbl.Font = Enum.Font.Gotham
+		lbl.TextSize = 14
+	end,
 
-function Library:AddTab(tabName)
-	local tabButton = Instance.new("TextButton", TabButtons)
-	tabButton.Text = tabName
-	tabButton.Size = UDim2.new(1, 0, 0, 30)
-	tabButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-	tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	tabButton.Font = Enum.Font.Gotham
-	tabButton.TextSize = 14
-	tabButton.BorderSizePixel = 0
-	Instance.new("UICorner", tabButton).CornerRadius = UDim.new(0, 6)
-
-	local scroll = Instance.new("ScrollingFrame", TabContent)
-	scroll.Size = UDim2.new(1, 0, 1, 0)
-	scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-	scroll.ScrollBarThickness = 4
-	scroll.BackgroundTransparency = 1
-	scroll.Visible = false
-	scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	scroll.Name = tabName
-
-	local layout = Instance.new("UIListLayout", scroll)
-	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Padding = UDim.new(0, 5)
-
-	Tabs[tabName] = scroll
-
-	tabButton.MouseButton1Click:Connect(function()
-		for _, tab in pairs(TabContent:GetChildren()) do
-			if tab:IsA("ScrollingFrame") then
-				tab.Visible = false
+	AddTextBox = function(_, placeholder, callback)
+		local txt = Instance.new("TextBox", scroll)
+		txt.Size = UDim2.new(1, -10, 0, 30)
+		txt.PlaceholderText = placeholder
+		txt.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+		txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+		txt.Font = Enum.Font.Gotham
+		txt.TextSize = 14
+		txt.BorderSizePixel = 0
+		txt.ClearTextOnFocus = false
+		Instance.new("UICorner", txt).CornerRadius = UDim.new(0, 6)
+		txt.FocusLost:Connect(function(enter)
+			if enter then
+				callback(txt.Text)
 			end
-		end
-		scroll.Visible = true
-	end)
+		end)
+	end,
 
-	return {
-		AddButton = function(_, text, callback)
-			local btn = Instance.new("TextButton", scroll)
-			btn.Size = UDim2.new(1, -10, 0, 30)
-			btn.Text = text
-			btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-			btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-			btn.Font = Enum.Font.Gotham
-			btn.TextSize = 14
-			btn.BorderSizePixel = 0
-			Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-			btn.MouseButton1Click:Connect(callback)
-		end,
+	AddKeybind = function(_, name, callback)
+		local lbl = Instance.new("TextLabel", scroll)
+		lbl.Size = UDim2.new(1, -10, 0, 25)
+		lbl.Text = name .. ": Pressione uma tecla"
+		lbl.BackgroundTransparency = 1
+		lbl.TextColor3 = Color3.fromRGB(200, 200, 200)
+		lbl.Font = Enum.Font.Gotham
+		lbl.TextSize = 14
 
-		AddLabel = function(_, text)
-			local lbl = Instance.new("TextLabel", scroll)
-			lbl.Size = UDim2.new(1, -10, 0, 25)
-			lbl.Text = text
-			lbl.BackgroundTransparency = 1
-			lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-			lbl.Font = Enum.Font.Gotham
-			lbl.TextSize = 14
-		end,
+		local listening = false
+		lbl.InputBegan:Connect(function()
+			if not listening then
+				listening = true
+				lbl.Text = name .. ": Aguardando tecla..."
+				local connection
+				connection = UserInputService.InputBegan:Connect(function(input, gpe)
+					if not gpe and input.UserInputType == Enum.UserInputType.Keyboard then
+						lbl.Text = name .. ": " .. input.KeyCode.Name
+						callback(input.KeyCode)
+						listening = false
+						connection:Disconnect()
+					end
+				end)
+			end
+		end)
+	end,
 
-		AddTextBox = function(_, placeholder, callback)
-			local txt = Instance.new("TextBox", scroll)
-			txt.Size = UDim2.new(1, -10, 0, 30)
-			txt.PlaceholderText = placeholder
-			txt.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-			txt.TextColor3 = Color3.fromRGB(255, 255, 255)
-			txt.Font = Enum.Font.Gotham
-			txt.TextSize = 14
-			txt.BorderSizePixel = 0
-			txt.ClearTextOnFocus = false
-			Instance.new("UICorner", txt).CornerRadius = UDim.new(0, 6)
-			txt.FocusLost:Connect(function(enter)
-				if enter then
-					callback(txt.Text)
-				end
-			end)
-		end,
+	AddToggle = function(_, text, callback)
+		local toggle = Instance.new("TextButton", scroll)
+		toggle.Size = UDim2.new(1, -10, 0, 30)
+		toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+		toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+		toggle.Font = Enum.Font.Gotham
+		toggle.TextSize = 14
+		toggle.BorderSizePixel = 0
+		Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 6)
 
-		AddKeybind = function(_, name, callback)
-			local lbl = Instance.new("TextLabel", scroll)
-			lbl.Size = UDim2.new(1, -10, 0, 25)
-			lbl.Text = name .. ": Pressione uma tecla"
-			lbl.BackgroundTransparency = 1
-			lbl.TextColor3 = Color3.fromRGB(200, 200, 200)
-			lbl.Font = Enum.Font.Gotham
-			lbl.TextSize = 14
+		local state = false
+		toggle.Text = "[ OFF ] " .. text
 
-			local listening = false
-			lbl.InputBegan:Connect(function()
-				if not listening then
-					listening = true
-					lbl.Text = name .. ": Aguardando tecla..."
-					local connection
-					connection = UserInputService.InputBegan:Connect(function(input, gpe)
-						if not gpe and input.UserInputType == Enum.UserInputType.Keyboard then
-							lbl.Text = name .. ": " .. input.KeyCode.Name
-							callback(input.KeyCode)
-							listening = false
-							connection:Disconnect()
-						end
-					end)
-				end
-			end)
-		end,
+		toggle.MouseButton1Click:Connect(function()
+			state = not state
+			toggle.Text = (state and "[ ON ] " or "[ OFF ] ") .. text
+			callback(state)
+		end)
+	end
+}
 
-		AddToggle = function(_, text, callback)
-			local toggle = Instance.new("TextButton", scroll)
-			toggle.Size = UDim2.new(1, -10, 0, 30)
-			toggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-			toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-			toggle.Font = Enum.Font.Gotham
-			toggle.TextSize = 14
-			toggle.BorderSizePixel = 0
-			Instance.new("UICorner", toggle).CornerRadius = UDim.new(0, 6)
-
-			local state = false
-			toggle.Text = "[ OFF ] " .. text
-
-			toggle.MouseButton1Click:Connect(function()
-				state = not state
-				toggle.Text = (state and "[ ON ] " or "[ OFF ] ") .. text
-				callback(state)
-			end)
-		end
-	}
 end
 
 return Library
+
